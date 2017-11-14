@@ -404,6 +404,14 @@ SwaggerUi.partials.signature = (function () {
         if (schema.$ref) {
           html += '<div>' + addReference(schema, name) + '</div>';
         } else if (type === 'object') {
+
+          if(_.isPlainObject(schema.additionalProperties)) {
+            if (!_.isPlainObject(schema.properties)) {
+              schema.properties = {};
+            }
+            schema.properties['{DYNAMIC_KEY}'] = _.cloneDeep(schema.additionalProperties);
+          }
+
           if (_.isPlainObject(schema.properties)) {
             contents = _.map(schema.properties, function (property, name) {
               var propertyIsRequired = (_.indexOf(schema.required, name) >= 0);
@@ -526,6 +534,10 @@ SwaggerUi.partials.signature = (function () {
 
           output[name] = schemaToJSON(cProperty, models, modelsToIgnore, modelPropertyMacro);
         });
+
+        if(_.isPlainObject(schema.additionalProperties)) {
+          output['{DYNAMIC_KEY}'] = schemaToJSON(_.cloneDeep(schema.additionalProperties), models, modelsToIgnore, modelPropertyMacro);
+        }
       } else if (type === 'array') {
         output = [];
 
